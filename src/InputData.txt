@@ -1,0 +1,12 @@
+# Please provide which top is the ball room. Numer from 1 to one axix size (x)
+# 2
+1
+
+# Draw your graph like
+# 1,0
+# 0,1
+0,1,0,0,1
+1,0,1,1,1
+0,1,0,1,1
+0,1,1,0,0
+1,1,1,0,0

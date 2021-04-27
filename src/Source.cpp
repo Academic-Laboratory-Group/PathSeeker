@@ -1,52 +1,15 @@
 #include "FileService.h"
 
 #include <iostream>
-#include <stack>
 #include <vector>
 
+static int counter;
 
-int sptr = 0;
-
-bool IsVisited(std::vector <int> visited, int Top)
+void DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::vector <int>& stack, std::vector <bool>& visited, int size, int Ballroom, int Iteration)
 {
-	for (int i = 0; i < visited.size(); ++i)
-	{
-		if (visited[i] == Top)
-			return true;
-	}
-	return false;
-}
 
-bool DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::stack <int>& stack, std::vector <int>& visited)
-{
-	visited.push_back(CurrentTop);
-
-	for (int Next_Top = 0; Next_Top < matrix.size(); ++Next_Top)
-	{
-		if (matrix[CurrentTop][Next_Top] == 1)
-		{
-			if (Next_Top != stack.top())
-			{
-				stack.push(CurrentTop);
-				if (Next_Top == FirstTop)
-				{
-					return true;
-				}
-				if (!IsVisited(visited, Next_Top) && DFS(matrix, FirstTop, Next_Top, stack, visited))
-				{
-					return true;
-				}
-				stack.pop();
-			}
-		}
-	}
-	return false;
-}
-
-void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::vector <int>& stack, std::vector <bool>& visited)
-{
-	stack[sptr++] = CurrentTop;
-	if (sptr < matrix.size() - 2)
+	stack[Iteration++] = CurrentTop;
+	if (Iteration < size)
 	{
 		visited[CurrentTop] = true;
 		for (int Next_Top = 0; Next_Top < matrix.size(); ++Next_Top)
@@ -54,7 +17,7 @@ void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::vector <int>
 			if (matrix[CurrentTop][Next_Top] == 1)
 			{
 				if (!visited[Next_Top])
-					DFSHamilton(matrix, FirstTop, Next_Top, stack, visited);
+					DFS(matrix, FirstTop, Next_Top, stack, visited, size, Ballroom, Iteration);
 			}
 		}
 		visited[CurrentTop] = false;
@@ -67,88 +30,83 @@ void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::vector <int>
 			{
 				if (Next_Top == FirstTop)
 				{
+					counter++;
+					bool tmp = false;
 					for (int i = 0; i < stack.size(); i++)
-						std::cout << " " << stack[i] + 1;
-
-					std::cout << " " << 1 + 1;
-					std::cout << std::endl;
+					{
+						if (stack[i] == Ballroom - 1)
+							tmp = true;
+					}
+					if (tmp)
+					{
+						if (counter == 1)
+						{
+							std::cout << "Wycieczke mozemy rozpoczac w punkcie: " << FirstTop + 1 << std::endl;
+							for (int i = 0; i < stack.size(); i++)
+							{
+								std::cout << stack[i] + 1 << " ";
+							}
+							std::cout << FirstTop + 1 << std::endl;
+						}
+						else
+						{
+							counter = 0;
+						}
+					}
 				}
 			}
 		}
 	}
-	--sptr;
+	Iteration--;
 }
 
 int MaxSize(Matrix& matrix)
 {
-	int* tmp = new int[matrix.size()];
-	int k = 0;
+	std::vector <int> maxSize(matrix.size());
 	for (int i = 0; i < matrix.size(); ++i)
 	{
 		for (int j = 0; j < matrix.size(); ++j)
 		{
-			tmp[k] += matrix[i][j];
+			maxSize[i] += matrix[i][j];
 		}
-		++k;
 	}
-	k = 0;
+
+	int max = 0;
 	for (int i = 0; i < matrix.size(); ++i)
 	{
-		if (tmp[i] > 1)
-			++k;
+		if (maxSize[i] > 1)
+			max++;
 	}
-	return k;
+	return max;
 }
 
 int main()
 {
-
 	Matrix matrix;
-	int ballRoom;
+	int ballRoom = -1;
 
 	readFile(ballRoom, matrix);
 
+	for (const auto e : matrix)
+	{
+		for (const auto e2 : e)
+			std::cout << e2 << " ";
+		std::cout << std::endl;
+	}
+
 	std::vector <bool> visited(matrix.size());
-	std::vector <int> mystack(matrix.size());
+	std::vector <int> stack(MaxSize(matrix));
 
 	for (int i = 0; i < matrix.size(); i++)
 	{
 		visited[i] = false;
 	}
-	sptr = 0;
-	//for (int FirstTop = 0; FirstTop < matrix.size(); ++FirstTop)
-	//{
-	//	visited.clear();
 
-	//	mystack.push(-1);
-
-	//	if (DFS(matrix, FirstTop, FirstTop, mystack, visited))
-	//	{
-	//		std::cout << "stos" << std::endl;
-	//		std::cout << FirstTop + 1;
-	//		while (!mystack.empty())
-	//		{
-	//			int tmp = mystack.top();
-	//				mystack.pop();
-	//				if (tmp > -1)
-	//					std::cout << " " << tmp + 1;
-	//				else
-	//					std::cout << std::endl;
-	//		}
-
-	//	}
-	//	else
-	//	{
-	//		mystack.pop();                 
-	//		std::cout << " - no cycle\n";
-	//	}
-	//}
-	std::cout << MaxSize(matrix) << std::endl;
-	DFSHamilton(matrix, 1, 1, mystack, visited);
-
-
-
-
+	for (int FirstTop = 0; FirstTop < matrix.size(); ++FirstTop)
+	{
+		int SecondTop = FirstTop;
+		DFS(matrix, FirstTop, SecondTop, stack, visited, MaxSize(matrix), ballRoom, 0);
+	}
 
 	return 0;
 }

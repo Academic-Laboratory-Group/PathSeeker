@@ -11,20 +11,22 @@ void readFile(int& ballRoom, Matrix& matrix)
 {
 	ballRoom = -1;
 	matrix.clear();
-	int size_x = -1;
-	int size_y = -1;
 
-	const auto string2vec = [size_x](std::string& line)
+	const auto string2vec = [](std::string& line)
 	{
 		std::vector<int> tmp;
-		for (size_t i = 0; i < size_x; ++i)
+		for (size_t i = 0; (i * 2) < line.size(); ++i)
 			tmp.emplace_back(line[i * 2] - '0');
 
-		return tmp;
+		return std::move(tmp);
 	};
 
 	std::fstream file;
-	file.open("inputData.txt", std::ios::in);
+	file.open("InputData.txt", std::ios::in);
+
+	if (file.bad() || file.fail())
+		throw std::runtime_error("Bad file");
+
 	std::string line;
 
 	while (getline(file, line))
@@ -32,19 +34,13 @@ void readFile(int& ballRoom, Matrix& matrix)
 		if (line[0] == '#' || line.empty())
 			continue;
 
-		if (size_x == -1 || size_y == -1)
+		if (ballRoom == -1)
 		{
-			size_x = line[0];
-			size_y = line[2];
-		}
-		else if (ballRoom == -1)
-		{
-			ballRoom = line[0];
+			ballRoom = line[0] - '0';
 		}
 		else
 		{
-			for (auto i = 0; i < size_x; ++i)
-				matrix.push_back(string2vec(line));
+			matrix.emplace_back(string2vec(line));
 		}
 	}
 
