@@ -1,9 +1,9 @@
-#include <iostream>
-#include <array>
-#include <vector>
-#include <stack>
+#include "FileService.h"
 
-using Matrix = std::array<std::array <int, 5>, 5>;
+#include <iostream>
+#include <stack>
+#include <vector>
+
 
 int sptr = 0;
 
@@ -43,7 +43,7 @@ bool DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::stack <int>& stack, 
 	return false;
 }
 
-void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::array <int, 5>& stack, std::array <bool, 5>& visited)
+void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::vector <int>& stack, std::vector <bool>& visited)
 {
 	stack[sptr++] = CurrentTop;
 	if (sptr < matrix.size() - 2)
@@ -76,12 +76,12 @@ void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::array <int, 
 			}
 		}
 	}
-	sptr--;
+	--sptr;
 }
 
 int MaxSize(Matrix& matrix)
 {
-	int *tmp = new int[matrix.size()];
+	int* tmp = new int[matrix.size()];
 	int k = 0;
 	for (int i = 0; i < matrix.size(); ++i)
 	{
@@ -89,30 +89,28 @@ int MaxSize(Matrix& matrix)
 		{
 			tmp[k] += matrix[i][j];
 		}
-		k++;
+		++k;
 	}
 	k = 0;
 	for (int i = 0; i < matrix.size(); ++i)
 	{
 		if (tmp[i] > 1)
-			k++;
+			++k;
 	}
 	return k;
 }
+
 int main()
 {
-	Matrix matrix{
-	{
-	   {0,0,0,0,1},
-	   {0,0,0,1,1},
-	   {0,0,0,1,0},
-	   {0,1,1,0,1},
-	   {1,1,0,1,0}
-	}
-	};
 
-	std::array <bool, matrix.size()> visited;
-	std::array <int, matrix.size()> mystack;
+	Matrix matrix;
+	int ballRoom;
+
+	readFile(ballRoom, matrix);
+
+	std::vector <bool> visited(matrix.size());
+	std::vector <int> mystack(matrix.size());
+
 	for (int i = 0; i < matrix.size(); i++)
 	{
 		visited[i] = false;
