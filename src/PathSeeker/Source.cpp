@@ -2,9 +2,10 @@
 #include <vector>
 
 using Matrix = std::vector<std::vector <int>>;
-
+static int counter;
 void DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::vector <int>& stack, std::vector <bool>& visited, int size, int Ballroom, int Iteration)
 {
+	
 	stack[Iteration++] = CurrentTop;
 	if (Iteration < size)
 	{
@@ -27,20 +28,28 @@ void DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::vector <int>& stack,
 			{
 				if (Next_Top == FirstTop)
 				{
-					int tmp = 0;
+					counter++;
+					bool tmp = false;
 					for (int i = 0; i < stack.size(); i++)
 					{
 						if (stack[i] == Ballroom - 1)
-							tmp = 1;
+							tmp = true;
 					}
-					if (tmp == 1)
+					if (tmp)
 					{
-						for (int i = 0; i < stack.size(); i++)
+						if (counter == 1)
 						{
-							std::cout << " " << stack[i] + 1;
+							std::cout << "Wycieczke mozemy rozpoczac w punkcie: " << FirstTop + 1 << std::endl;
+							for (int i = 0; i < stack.size(); i++)
+							{
+								std::cout << stack[i] + 1 << " ";
+							}
+							std::cout << FirstTop + 1 << std::endl;
 						}
-						std::cout << " " << FirstTop + 1;
-						std::cout << std::endl;
+						else
+						{
+							counter = 0;
+						}
 					}
 				}
 			}
