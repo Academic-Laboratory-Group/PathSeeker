@@ -1,11 +1,13 @@
+#include "FileService.h"
+
 #include <iostream>
 #include <vector>
 
-using Matrix = std::vector<std::vector <int>>;
 static int counter;
+
 void DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::vector <int>& stack, std::vector <bool>& visited, int size, int Ballroom, int Iteration)
 {
-	
+
 	stack[Iteration++] = CurrentTop;
 	if (Iteration < size)
 	{
@@ -77,19 +79,20 @@ int MaxSize(Matrix& matrix)
 	}
 	return max;
 }
-void main()
-{
-	int Ballroom = 2;
 
-	Matrix matrix{
+int main()
+{
+	Matrix matrix;
+	int ballRoom = -1;
+
+	readFile(ballRoom, matrix);
+
+	for (const auto e : matrix)
 	{
-	   {0,1,0,0,1},
-	   {1,0,1,1,1},
-	   {0,1,0,1,1},
-	   {0,1,1,0,0},
-	   {1,1,1,0,0}
+		for (const auto e2 : e)
+			std::cout << e2 << " ";
+		std::cout << std::endl;
 	}
-	};
 
 	std::vector <bool> visited(matrix.size());
 	std::vector <int> stack(MaxSize(matrix));
@@ -102,6 +105,8 @@ void main()
 	for (int FirstTop = 0; FirstTop < matrix.size(); ++FirstTop)
 	{
 		int SecondTop = FirstTop;
-		DFS(matrix, FirstTop, SecondTop, stack, visited, MaxSize(matrix), Ballroom, 0);
+		DFS(matrix, FirstTop, SecondTop, stack, visited, MaxSize(matrix), ballRoom, 0);
 	}
+
+	return 0;
 }
