@@ -7,6 +7,7 @@ using Matrix = std::array<std::array <int, 5>, 5>;
 
 int sptr = 0;
 
+
 bool IsVisited(std::vector <int> visited, int Top)
 {
 	for (int i = 0; i < visited.size(); ++i)
@@ -43,10 +44,10 @@ bool DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::stack <int>& stack, 
 	return false;
 }
 
-void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::array <int, 5>& stack, std::array <bool, 5>& visited)
+void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::array <int, 5>& stack, std::array <bool, 5>& visited, int size)
 {
 	stack[sptr++] = CurrentTop;
-	if (sptr < matrix.size() - 2)
+	if (sptr < size)
 	{
 		visited[CurrentTop] = true;
 		for (int Next_Top = 0; Next_Top < matrix.size(); ++Next_Top)
@@ -54,7 +55,7 @@ void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::array <int, 
 			if (matrix[CurrentTop][Next_Top] == 1)
 			{
 				if (!visited[Next_Top])
-					DFSHamilton(matrix, FirstTop, Next_Top, stack, visited);
+					DFSHamilton(matrix, FirstTop, Next_Top, stack, visited, size);
 			}
 		}
 		visited[CurrentTop] = false;
@@ -67,7 +68,7 @@ void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::array <int, 
 			{
 				if (Next_Top == FirstTop)
 				{
-					for (int i = 0; i < stack.size(); i++)
+					for (int i = 0; i < size; i++)
 						std::cout << " " << stack[i] + 1;
 
 					std::cout << " " << 1 + 1;
@@ -81,23 +82,21 @@ void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::array <int, 
 
 int MaxSize(Matrix& matrix)
 {
-	int *tmp = new int[matrix.size()];
-	int k = 0;
+	std::array <int, 5> maxSize{};
 	for (int i = 0; i < matrix.size(); ++i)
 	{
 		for (int j = 0; j < matrix.size(); ++j)
 		{
-			tmp[k] += matrix[i][j];
+			maxSize[i] += matrix[i][j];
 		}
-		k++;
 	}
-	k = 0;
+	int y = 0;
 	for (int i = 0; i < matrix.size(); ++i)
 	{
-		if (tmp[i] > 1)
-			k++;
+		if (maxSize[i] > 1)
+			y++;
 	}
-	return k;
+	return y;
 }
 int main()
 {
@@ -112,7 +111,7 @@ int main()
 	};
 
 	std::array <bool, matrix.size()> visited;
-	std::array <int, matrix.size()> mystack;
+	std::array <int, matrix.size()> mystack{};
 	for (int i = 0; i < matrix.size(); i++)
 	{
 		visited[i] = false;
@@ -145,8 +144,8 @@ int main()
 	//		std::cout << " - no cycle\n";
 	//	}
 	//}
-	std::cout << MaxSize(matrix) << std::endl;
-	DFSHamilton(matrix, 1, 1, mystack, visited);
+	
+	DFSHamilton(matrix, 1, 1, mystack, visited, MaxSize(matrix));
 
 
 
