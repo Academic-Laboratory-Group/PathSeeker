@@ -5,10 +5,22 @@
 
 using Matrix = std::array<std::array <int, 5>, 5>;
 
-bool DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::stack <int> &stack, std::array <bool, 5>& visited)
+int sptr = 0;
+
+bool IsVisited(std::vector <int> visited, int Top)
 {
-	visited[CurrentTop] = true;
-	
+	for (int i = 0; i < visited.size(); ++i)
+	{
+		if (visited[i] == Top)
+			return true;
+	}
+	return false;
+}
+
+bool DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::stack <int>& stack, std::vector <int>& visited)
+{
+	visited.push_back(CurrentTop);
+
 	for (int Next_Top = 0; Next_Top < matrix.size(); ++Next_Top)
 	{
 		if (matrix[CurrentTop][Next_Top] == 1)
@@ -20,68 +32,125 @@ bool DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::stack <int> &stack, 
 				{
 					return true;
 				}
-				if ((!visited[Next_Top]))
+				if (!IsVisited(visited, Next_Top) && DFS(matrix, FirstTop, Next_Top, stack, visited))
 				{
-					if(DFS(matrix, FirstTop, Next_Top, stack, visited))
-						return true;
+					return true;
 				}
 				stack.pop();
-				
 			}
-
 		}
 	}
-	
-
 	return false;
 }
 
+void DFSHamilton(Matrix& matrix, int FirstTop, int CurrentTop, std::array <int, 5>& stack, std::array <bool, 5>& visited)
+{
+	stack[sptr++] = CurrentTop;
+	if (sptr < matrix.size() - 2)
+	{
+		visited[CurrentTop] = true;
+		for (int Next_Top = 0; Next_Top < matrix.size(); ++Next_Top)
+		{
+			if (matrix[CurrentTop][Next_Top] == 1)
+			{
+				if (!visited[Next_Top])
+					DFSHamilton(matrix, FirstTop, Next_Top, stack, visited);
+			}
+		}
+		visited[CurrentTop] = false;
+	}
+	else
+	{
+		for (int Next_Top = 0; Next_Top < matrix.size(); ++Next_Top)
+		{
+			if (matrix[CurrentTop][Next_Top] == 1)
+			{
+				if (Next_Top == FirstTop)
+				{
+					for (int i = 0; i < stack.size(); i++)
+						std::cout << " " << stack[i] + 1;
+
+					std::cout << " " << 1 + 1;
+					std::cout << std::endl;
+				}
+			}
+		}
+	}
+	sptr--;
+}
+
+int MaxSize(Matrix& matrix)
+{
+	int *tmp = new int[matrix.size()];
+	int k = 0;
+	for (int i = 0; i < matrix.size(); ++i)
+	{
+		for (int j = 0; j < matrix.size(); ++j)
+		{
+			tmp[k] += matrix[i][j];
+		}
+		k++;
+	}
+	k = 0;
+	for (int i = 0; i < matrix.size(); ++i)
+	{
+		if (tmp[i] > 1)
+			k++;
+	}
+	return k;
+}
 int main()
 {
-	int Ballroom = 3;
-	
 	Matrix matrix{
 	{
-	   {0,1,0,0,1},
-	   {1,0,1,1,1},
-	   {0,1,0,1,1},
-	   {0,1,1,0,0},
-	   {1,1,1,0,0}
+	   {0,0,0,0,1},
+	   {0,0,0,1,1},
+	   {0,0,0,1,0},
+	   {0,1,1,0,1},
+	   {1,1,0,1,0}
 	}
 	};
 
-	std::stack<int> mystack;
-	std::stack<int> mystack2;
-	std::array <bool, matrix.size()> visited;;
-
-	for (int FirstTop = 0; FirstTop < matrix.size(); ++FirstTop)
+	std::array <bool, matrix.size()> visited;
+	std::array <int, matrix.size()> mystack;
+	for (int i = 0; i < matrix.size(); i++)
 	{
-		for (int i = 0; i < matrix.size(); i++)
-		{
-			visited[i] = false;
-		}
-
-		mystack.push(-1);
-
-		if (DFS(matrix, FirstTop, FirstTop, mystack, visited))
-		{
-			std::cout << "stos" << std::endl;
-			
-			while (!mystack.empty())
-			{
-				mystack2.push(mystack.top());
-					mystack.pop();
-			}
-
-			while (!mystack2.empty())
-			{
-				int tmp = mystack2.top();
-				mystack2.pop();
-				if (tmp > -1)
-					std::cout <<  tmp + 1 << " " ;
-			}
-			std::cout << FirstTop + 1 << std::endl;
-		}
+		visited[i] = false;
 	}
+	sptr = 0;
+	//for (int FirstTop = 0; FirstTop < matrix.size(); ++FirstTop)
+	//{
+	//	visited.clear();
+
+	//	mystack.push(-1);
+
+	//	if (DFS(matrix, FirstTop, FirstTop, mystack, visited))
+	//	{
+	//		std::cout << "stos" << std::endl;
+	//		std::cout << FirstTop + 1;
+	//		while (!mystack.empty())
+	//		{
+	//			int tmp = mystack.top();
+	//				mystack.pop();
+	//				if (tmp > -1)
+	//					std::cout << " " << tmp + 1;
+	//				else
+	//					std::cout << std::endl;
+	//		}
+
+	//	}
+	//	else
+	//	{
+	//		mystack.pop();                 
+	//		std::cout << " - no cycle\n";
+	//	}
+	//}
+	std::cout << MaxSize(matrix) << std::endl;
+	DFSHamilton(matrix, 1, 1, mystack, visited);
+
+
+
+
+
 	return 0;
 }
