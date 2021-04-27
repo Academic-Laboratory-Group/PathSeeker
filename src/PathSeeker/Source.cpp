@@ -5,19 +5,9 @@
 
 using Matrix = std::array<std::array <int, 5>, 5>;
 
-bool IsVisited(std::vector <int> visited, int Top)
+bool DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::stack <int> &stack, std::array <bool, 5>& visited)
 {
-	for (int i = 0; i < visited.size(); ++i)
-	{
-		if (visited[i] == Top)
-			return true;
-	}
-	return false;
-}
-
-bool DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::stack <int> &stack, std::vector <int>  &visited)
-{
-	visited.push_back(CurrentTop);
+	visited[CurrentTop] = true;
 	
 	for (int Next_Top = 0; Next_Top < matrix.size(); ++Next_Top)
 	{
@@ -30,15 +20,19 @@ bool DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::stack <int> &stack, 
 				{
 					return true;
 				}
-				if (!IsVisited(visited, Next_Top) && DFS(matrix, FirstTop, Next_Top, stack, visited))
+				if ((!visited[Next_Top]))
 				{
-					return true;
+					if(DFS(matrix, FirstTop, Next_Top, stack, visited))
+						return true;
 				}
 				stack.pop();
+				
 			}
 
 		}
 	}
+	
+
 	return false;
 }
 
@@ -58,11 +52,14 @@ int main()
 
 	std::stack<int> mystack;
 	std::stack<int> mystack2;
-	std::vector <int> visited;
+	std::array <bool, matrix.size()> visited;;
 
 	for (int FirstTop = 0; FirstTop < matrix.size(); ++FirstTop)
 	{
-		visited.clear();
+		for (int i = 0; i < matrix.size(); i++)
+		{
+			visited[i] = false;
+		}
 
 		mystack.push(-1);
 
