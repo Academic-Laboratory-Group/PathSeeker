@@ -57,6 +57,7 @@ int main()
 	};
 
 	std::stack<int> mystack;
+	std::stack<int> mystack2;
 	std::vector <int> visited;
 
 	for (int FirstTop = 0; FirstTop < matrix.size(); ++FirstTop)
@@ -68,17 +69,21 @@ int main()
 		if (DFS(matrix, FirstTop, FirstTop, mystack, visited))
 		{
 			std::cout << "stos" << std::endl;
-			std::cout << FirstTop + 1;
+			
 			while (!mystack.empty())
 			{
-				int tmp = mystack.top();
+				mystack2.push(mystack.top());
 					mystack.pop();
-					if (tmp > -1)
-						std::cout << " " << tmp + 1;
-					else
-						std::cout << std::endl;
 			}
 
+			while (!mystack2.empty())
+			{
+				int tmp = mystack2.top();
+				mystack2.pop();
+				if (tmp > -1)
+					std::cout <<  tmp + 1 << " " ;
+			}
+			std::cout << FirstTop + 1 << std::endl;
 		}
 	}
 	return 0;
