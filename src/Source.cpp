@@ -1,112 +1,113 @@
 #include "FileService.h"
 
 #include <iostream>
+#include <numeric>
+#include <algorithm>
 #include <vector>
 
-static int counter;
 
-void DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::vector <int>& stack, std::vector <bool>& visited, int size, int Ballroom, int Iteration)
+void DFS(const Matrix& matrix, int currentNode, std::vector <int>& stack, std::vector <bool>& visited, int& ballroom, int iteration)
 {
+	// Push actual node into the stack
+	stack[iteration++] = currentNode;
 
-	stack[Iteration++] = CurrentTop;
-	if (Iteration < size)
+	if (iteration < stack.size())
 	{
-		visited[CurrentTop] = true;
-		for (int Next_Top = 0; Next_Top < matrix.size(); ++Next_Top)
-		{
-			if (matrix[CurrentTop][Next_Top] == 1)
-			{
-				if (!visited[Next_Top])
-					DFS(matrix, FirstTop, Next_Top, stack, visited, size, Ballroom, Iteration);
-			}
-		}
-		visited[CurrentTop] = false;
+		// Mark node as visited
+		visited[currentNode] = true;
+
+		// Check all possible next nodes if any has connection and if it hasn't been visited yet
+		for (int nextTop = 0; nextTop < matrix.size(); ++nextTop)
+			if (matrix[currentNode][nextTop] == 1 && !visited[nextTop])
+				DFS(matrix, nextTop, stack, visited, ballroom, iteration);
+
+		// If all have been visited then it is needed to go back by one node
+		visited[currentNode] = false;
+		--iteration;
 	}
 	else
 	{
-		for (int Next_Top = 0; Next_Top < matrix.size(); ++Next_Top)
+		// Path is finded. Now check if it is a cycle. 
+		for (int nextTop = 0; nextTop < matrix.size(); ++nextTop)
 		{
-			if (matrix[CurrentTop][Next_Top] == 1)
+			// Is this neighbour of currentNode first in the stack?
+			if (matrix[currentNode][nextTop] == 1 && nextTop == stack[0])
 			{
-				if (Next_Top == FirstTop)
+				// It is a cycle! Now check if ball room was reached on path. If not, path is unnedded.
+				for (int i = 0; i < stack.size(); ++i)
 				{
-					counter++;
-					bool tmp = false;
-					for (int i = 0; i < stack.size(); i++)
+					if (stack[i] == ballroom - 1)
 					{
-						if (stack[i] == Ballroom - 1)
-							tmp = true;
-					}
-					if (tmp)
-					{
-						if (counter == 1)
-						{
-							std::cout << "Wycieczke mozemy rozpoczac w punkcie: " << FirstTop + 1 << std::endl;
-							for (int i = 0; i < stack.size(); i++)
-							{
-								std::cout << stack[i] + 1 << " ";
-							}
-							std::cout << FirstTop + 1 << std::endl;
-						}
-						else
-						{
-							counter = 0;
-						}
+						// Show path
+						std::cout << "Trip can be started from node " << stack[0] + 1 << " and path will be:\n ";
+						std::for_each(stack.begin(), stack.end(), [](const auto e) {std::cout << e + 1 << " -> "; });
+						std::cout << stack[0] + 1 << std::endl;
+						break;
 					}
 				}
+				break;
 			}
 		}
 	}
-	Iteration--;
 }
 
-int MaxSize(Matrix& matrix)
+/// <summary>
+/// Amount of nodes with degree more than 1
+/// </summary>
+/// <param name="matrix"></param>
+int MaxSize(const Matrix& matrix)
 {
-	std::vector <int> maxSize(matrix.size());
-	for (int i = 0; i < matrix.size(); ++i)
-	{
-		for (int j = 0; j < matrix.size(); ++j)
-		{
-			maxSize[i] += matrix[i][j];
-		}
-	}
-
+	// Variable for calculations
 	int max = 0;
+
+	// Incremetation of the max variable every time sum of elements in row is bigger than 1
 	for (int i = 0; i < matrix.size(); ++i)
-	{
-		if (maxSize[i] > 1)
-			max++;
-	}
+		if (1 < std::accumulate(matrix[i].begin(), matrix[i].end(), 0))
+			++max;
+
 	return max;
 }
 
-int main()
+/// <summary>
+/// Writes matrix into the console
+/// </summary>
+/// <param name="matrix"></param>
+void readMatrix(const Matrix& matrix)
 {
-	Matrix matrix;
-	int ballRoom = -1;
-
-	readFile(ballRoom, matrix);
-
 	for (const auto e : matrix)
 	{
 		for (const auto e2 : e)
 			std::cout << e2 << " ";
 		std::cout << std::endl;
 	}
+}
 
+int main()
+{
+	// Most important variables
+	Matrix matrix;
+	int ballRoom = -1;
+
+	// File reading
+	if (!readFile(ballRoom, matrix))
+	{
+		std::cout << "Bad file" << std::endl;
+		return -1;
+	}
+
+	// Writting variables into console
+	std::cout << "Graph taken into consideration:\n";
+	readMatrix(matrix);
+	std::cout << "\nBall room is in " << ballRoom << " node.\n\n";
+
+	// Setup some algorithm variables
 	std::vector <bool> visited(matrix.size());
 	std::vector <int> stack(MaxSize(matrix));
+	std::fill(visited.begin(), visited.end(), false);
 
-	for (int i = 0; i < matrix.size(); i++)
-	{
-		visited[i] = false;
-	}
+	for (int firstTop = 0; firstTop < matrix.size(); ++firstTop)
+		DFS(matrix, firstTop, stack, visited, ballRoom, 0);
 
-	for (int FirstTop = 0; FirstTop < matrix.size(); ++FirstTop)
-	{
-		int SecondTop = FirstTop;
-		DFS(matrix, FirstTop, SecondTop, stack, visited, MaxSize(matrix), ballRoom, 0);
-	}
-
+	system("pause");
 	return 0;
 }
