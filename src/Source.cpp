@@ -5,60 +5,37 @@
 #include <algorithm>
 #include <vector>
 
-
-void DFS(const Matrix& matrix, int currentNode, std::vector <int>& stack, std::vector <bool>& visited, int& ballroom, int iteration)
+bool DFS(const Matrix& matrix, int currentNode, std::vector <int>& path, std::vector <bool>& visited, int iteration)
 {
-	// Push actual node into the stack
-	stack[iteration++] = currentNode;
+	// If iteration is out of the path size, stop looking for next node
+	if (iteration >= path.size())
+		return true;
 
-	if (iteration < stack.size())
+	// Set actual node in the path and mark as visited
+	path[iteration] = currentNode;
+	visited[currentNode] = true;
+
+	// Check all possible next nodes if any has connection and if it hasn't been visited yet
+	for (int nextTop = 0; nextTop < matrix.size(); ++nextTop)
 	{
-		// Mark node as visited
-		visited[currentNode] = true;
-
-		// Check all possible next nodes if any has connection and if it hasn't been visited yet
-		for (int nextTop = 0; nextTop < matrix.size(); ++nextTop)
-			if (matrix[currentNode][nextTop] == 1 && !visited[nextTop])
-				DFS(matrix, nextTop, stack, visited, ballroom, iteration);
-
-		// If all have been visited then it is needed to go back by one node
-		visited[currentNode] = false;
-		--iteration;
-	}
-	else
-	{
-		// Path is finded. Now check if it is a cycle. 
-		for (int nextTop = 0; nextTop < matrix.size(); ++nextTop)
+		if (matrix[currentNode][nextTop] == 1 && (!visited[nextTop] || (iteration + 1 == path.size() && nextTop == path[0])))
 		{
-			// Is this neighbour of currentNode first in the stack?
-			if (matrix[currentNode][nextTop] == 1 && nextTop == stack[0])
-			{
-				// It is a cycle! Now check if ball room was reached on path. If not, path is unnedded.
-				for (int i = 0; i < stack.size(); ++i)
-				{
-					if (stack[i] == ballroom - 1)
-					{
-						// Show path
-						std::cout << "Trip can be started from node " << stack[0] + 1 << " and path will be:\n ";
-						std::for_each(stack.begin(), stack.end(), [](const auto e) {std::cout << e + 1 << " -> "; });
-						std::cout << stack[0] + 1 << std::endl;
-						break;
-					}
-				}
-				break;
-			}
+			if (DFS(matrix, nextTop, path, visited, iteration + 1))
+				return true;
 		}
 	}
+
+	// If all have been visited then it is needed to go back by one node
+	visited[currentNode] = false;
+
+	return false;
 }
 
-/// <summary>
 /// Amount of nodes with degree more than 1
-/// </summary>
-/// <param name="matrix"></param>
-int MaxSize(const Matrix& matrix)
+size_t MaxSize(const Matrix& matrix)
 {
 	// Variable for calculations
-	int max = 0;
+	size_t max = 0;
 
 	// Incremetation of the max variable every time sum of elements in row is bigger than 1
 	for (int i = 0; i < matrix.size(); ++i)
@@ -68,18 +45,30 @@ int MaxSize(const Matrix& matrix)
 	return max;
 }
 
-/// <summary>
 /// Writes matrix into the console
-/// </summary>
-/// <param name="matrix"></param>
-void readMatrix(const Matrix& matrix)
+void readMatrix(const Matrix& matrix, const char* colDelimiter = " ", bool isPath = false)
 {
-	for (const auto e : matrix)
+	for (const auto& e : matrix)
 	{
-		for (const auto e2 : e)
-			std::cout << e2 << " ";
+		for (const auto& e2 : e)
+			std::cout << e2 + isPath << colDelimiter;
+		if (isPath)
+			std::cout << e.front() + isPath;
 		std::cout << std::endl;
 	}
+}
+
+/// Check task requirements and return only correct paths
+bool checkRequirements(const std::vector<int>& path, const int ballRoom, const Matrix& matrix)
+{
+	// Check if it is a cycle.
+	if (matrix[path.back()][path[0]] == 1)
+		// It is a cycle! Now check if ball room was reached on path. If not, path is unnedded.
+		for (const auto& e : path)
+			if (e == ballRoom - 1)
+				return true;
+
+	return false;
 }
 
 int main()
@@ -98,16 +87,26 @@ int main()
 	// Writting variables into console
 	std::cout << "Graph taken into consideration:\n";
 	readMatrix(matrix);
-	std::cout << "\nBall room is in " << ballRoom << " node.\n\n";
+	std::cout << "\nwhere ball room is in " << ballRoom << " node.\n\n";
 
 	// Setup some algorithm variables
+	Matrix paths;
 	std::vector <bool> visited(matrix.size());
-	std::vector <int> stack(MaxSize(matrix));
-	std::fill(visited.begin(), visited.end(), false);
+	std::vector <int> path(MaxSize(matrix));
 
+	// Look for possible paths
 	for (int firstTop = 0; firstTop < matrix.size(); ++firstTop)
-		DFS(matrix, firstTop, stack, visited, ballRoom, 0);
+	{
+		std::fill(visited.begin(), visited.end(), false);
+		if (DFS(matrix, firstTop, path, visited, 0) && checkRequirements(path, ballRoom, matrix))
+			paths.push_back(path);
+	}
 
+	// Write paths down on the console
+	std::cout << "Existing paths:\n";
+	readMatrix(paths, " -> ", true);
+
+	// Prevent from closing the console automatically
 	system("pause");
 	return 0;
 }
