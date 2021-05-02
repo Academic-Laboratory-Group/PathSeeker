@@ -94,17 +94,28 @@ int main()
 	std::vector <bool> visited(matrix.size());
 	std::vector <int> path(MaxSize(matrix));
 
-	// Look for possible paths
-	for (int firstTop = 0; firstTop < matrix.size(); ++firstTop)
+	// If there are any nodes with degree more than 1
+	if (path.size() != 0)
 	{
-		std::fill(visited.begin(), visited.end(), false);
-		if (DFS(matrix, firstTop, path, visited, 0) && checkRequirements(path, ballRoom, matrix))
-			paths.push_back(path);
+		// Look for possible paths
+		for (int firstTop = 0; firstTop < matrix.size(); ++firstTop)
+		{
+			std::fill(visited.begin(), visited.end(), false);
+			if (DFS(matrix, firstTop, path, visited, 0) && checkRequirements(path, ballRoom, matrix))
+				paths.push_back(path);
+		}
 	}
 
 	// Write paths down on the console
-	std::cout << "Existing paths:\n";
-	readMatrix(paths, " -> ", true);
+	if (paths.empty())
+	{
+		std::cout << "There is no proper path.\n";
+	}
+	else
+	{
+		std::cout << "Existing paths:\n";
+		readMatrix(paths, " -> ", true);
+	}
 
 	// Prevent from closing the console automatically
 	system("pause");
