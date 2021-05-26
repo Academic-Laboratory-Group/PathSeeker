@@ -7,7 +7,7 @@
 
 using Matrix = std::vector<std::vector <int>>;
 
-void readFile(int& ballRoom, Matrix& matrix)
+bool readFile(int& ballRoom, Matrix& matrix)
 {
 	ballRoom = -1;
 	matrix.clear();
@@ -25,7 +25,7 @@ void readFile(int& ballRoom, Matrix& matrix)
 	file.open("InputData.txt", std::ios::in);
 
 	if (file.bad() || file.fail())
-		throw std::runtime_error("Bad file");
+		return false;
 
 	std::string line;
 
@@ -45,4 +45,5 @@ void readFile(int& ballRoom, Matrix& matrix)
 	}
 
 	file.close();
+	return true;
 }
