@@ -71,6 +71,22 @@ bool checkRequirements(const std::vector<int>& path, const int ballRoom, const M
 	return false;
 }
 
+Matrix RemoveTop(Matrix& matrix, int top)
+{
+	Matrix tmp = matrix;
+	for (int i = 0; i < matrix.size(); ++i)
+	{
+		for (int j = 0; j < matrix.size(); ++j)
+		{
+			if (i == top || j == top)
+			{
+				tmp[i][j] = 0;
+			}
+		}
+	}
+	return tmp;
+}
+
 int main()
 {
 	// Most important variables
@@ -115,6 +131,23 @@ int main()
 	{
 		std::cout << "Existing paths:\n";
 		readMatrix(paths, " -> ", true);
+		if (!IF_FIND)
+		{
+			std::cout << "not find" << std::endl;
+			for (int i = 1; i <= MaxSize(matrix); ++i)
+			{
+				for (int j = 0; j < MaxSize(matrix); ++j)
+				{
+					if (j != FirstTop)
+						DFS(RemoveTop(matrix, j), FirstTop, SecondTop, stack, visited, MaxSize(matrix) - i, ballRoom, 0);
+					if (IF_FIND)
+						break;
+				}
+				if (IF_FIND)
+					break;
+			}
+		}
+		IF_FIND = false;
 	}
 
 	// Prevent from closing the console automatically
