@@ -71,20 +71,58 @@ bool checkRequirements(const std::vector<int>& path, const int ballRoom, const M
 	return false;
 }
 
-Matrix RemoveTop(Matrix& matrix, int top)
+Matrix RemoveTop(Matrix matrix, int top)
 {
-	Matrix tmp = matrix;
-	for (int i = 0; i < matrix.size(); ++i)
+	std::fill(matrix[top].begin(), matrix[top].end(), 0);
+	std::for_each(matrix.begin(), matrix.end(), [top](auto& v) {v[top] = 0; });
+
+	return std::move(matrix);
+}
+
+std::vector<int> findPath(Matrix matrix, int ballRoom, int firstTop)
+{
+	std::vector <int> path(MaxSize(matrix));
+	std::vector <bool> visited(matrix.size(), false);
+
+	if (DFS(matrix, firstTop, path, visited, 0) && checkRequirements(path, ballRoom, matrix))
+		return path;
+	else
 	{
-		for (int j = 0; j < matrix.size(); ++j)
+		for (int i = 1; i <= MaxSize(matrix); ++i)
 		{
-			if (i == top || j == top)
+			for (int j = 0; j < MaxSize(matrix); ++j)
 			{
-				tmp[i][j] = 0;
+				std::vector <int> shorterPath(MaxSize(matrix) - i);
+				std::fill(visited.begin(), visited.end(), false);
+
+				if (j != firstTop && DFS(RemoveTop(matrix, j), firstTop, shorterPath, visited, 0) && checkRequirements(shorterPath, ballRoom, matrix))
+					return shorterPath;
 			}
 		}
 	}
-	return tmp;
+	return {};
+}
+
+Matrix findPaths(Matrix matrix, int ballRoom)
+{
+	// Setup some algorithm variables
+	Matrix paths;
+
+	// If there are any nodes with degree more than 1
+	if (MaxSize(matrix) != 0)
+	{
+		// Look for possible paths
+		for (int firstTop = 0; firstTop < matrix.size(); ++firstTop)
+		{
+			const auto found = findPath(matrix, ballRoom, firstTop);
+			if (!found.empty())
+			{
+				paths.push_back(found);
+			}
+		}
+	}
+
+	return paths;
 }
 
 int main()
@@ -105,22 +143,7 @@ int main()
 	readMatrix(matrix);
 	std::cout << "\nwhere ball room is in " << ballRoom << " node.\n\n";
 
-	// Setup some algorithm variables
-	Matrix paths;
-	std::vector <bool> visited(matrix.size());
-	std::vector <int> path(MaxSize(matrix));
-
-	// If there are any nodes with degree more than 1
-	if (path.size() != 0)
-	{
-		// Look for possible paths
-		for (int firstTop = 0; firstTop < matrix.size(); ++firstTop)
-		{
-			std::fill(visited.begin(), visited.end(), false);
-			if (DFS(matrix, firstTop, path, visited, 0) && checkRequirements(path, ballRoom, matrix))
-				paths.push_back(path);
-		}
-	}
+	const auto paths = findPaths(matrix, ballRoom);
 
 	// Write paths down on the console
 	if (paths.empty())
@@ -131,23 +154,6 @@ int main()
 	{
 		std::cout << "Existing paths:\n";
 		readMatrix(paths, " -> ", true);
-		if (!IF_FIND)
-		{
-			std::cout << "not find" << std::endl;
-			for (int i = 1; i <= MaxSize(matrix); ++i)
-			{
-				for (int j = 0; j < MaxSize(matrix); ++j)
-				{
-					if (j != FirstTop)
-						DFS(RemoveTop(matrix, j), FirstTop, SecondTop, stack, visited, MaxSize(matrix) - i, ballRoom, 0);
-					if (IF_FIND)
-						break;
-				}
-				if (IF_FIND)
-					break;
-			}
-		}
-		IF_FIND = false;
 	}
 
 	// Prevent from closing the console automatically
