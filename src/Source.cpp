@@ -4,8 +4,8 @@
 #include <vector>
 
 static int counter;
-
-void DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::vector <int>& stack, std::vector <bool>& visited, int size, int Ballroom, int Iteration)
+static bool IF_FIND;
+void DFS(Matrix matrix, int FirstTop, int CurrentTop, std::vector <int>& stack, std::vector <bool>& visited, int size, int Ballroom, int Iteration)
 {
 
 	stack[Iteration++] = CurrentTop;
@@ -41,8 +41,9 @@ void DFS(Matrix& matrix, int FirstTop, int CurrentTop, std::vector <int>& stack,
 					{
 						if (counter == 1)
 						{
+							IF_FIND = true;
 							std::cout << "Wycieczke mozemy rozpoczac w punkcie: " << FirstTop + 1 << std::endl;
-							for (int i = 0; i < stack.size(); i++)
+							for (int i = 0; i < size; i++)
 							{
 								std::cout << stack[i] + 1 << " ";
 							}
@@ -80,6 +81,22 @@ int MaxSize(Matrix& matrix)
 	return max;
 }
 
+Matrix RemoveTop(Matrix& matrix, int top)
+{
+	Matrix tmp = matrix;
+	for (int i = 0; i < matrix.size(); ++i)
+	{
+		for (int j = 0; j < matrix.size(); ++j)
+		{
+			if (i == top || j == top)
+			{
+				tmp[i][j] = 0;
+			}
+		}
+	}
+	return tmp;
+}
+
 int main()
 {
 	Matrix matrix;
@@ -100,12 +117,31 @@ int main()
 	for (int i = 0; i < matrix.size(); i++)
 	{
 		visited[i] = false;
+		stack[i] = 0;
 	}
-
+	std::cout << std::endl;
 	for (int FirstTop = 0; FirstTop < matrix.size(); ++FirstTop)
 	{
 		int SecondTop = FirstTop;
+
 		DFS(matrix, FirstTop, SecondTop, stack, visited, MaxSize(matrix), ballRoom, 0);
+		if (!IF_FIND)
+		{
+			std::cout << "not find" << std::endl;
+			for (int i = 1; i <= MaxSize(matrix); ++i)
+			{
+				for (int j = 0; j < MaxSize(matrix); ++j)
+				{
+					if (j != FirstTop)
+						DFS(RemoveTop(matrix, j), FirstTop, SecondTop, stack, visited, MaxSize(matrix) - i, ballRoom, 0);
+					if (IF_FIND)
+						break;
+				}
+				if (IF_FIND)
+					break;
+			}
+		}
+		IF_FIND = false;
 	}
 
 	return 0;
