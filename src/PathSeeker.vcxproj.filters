@@ -6,4 +6,7 @@
   <ItemGroup>
     <ClInclude Include="FileService.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="InputData.txt" />
+  </ItemGroup>
 </Project>

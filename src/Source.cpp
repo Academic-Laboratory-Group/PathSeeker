@@ -61,6 +61,9 @@ void readMatrix(const Matrix& matrix, const char* colDelimiter = " ", bool isPat
 /// Check task requirements and return only correct paths
 bool checkRequirements(const std::vector<int>& path, const int ballRoom, const Matrix& matrix)
 {
+	if (path.empty())
+		return false;
+
 	// Check if it is a cycle.
 	if (matrix[path.back()][path[0]] == 1)
 		// It is a cycle! Now check if ball room was reached on path. If not, path is unnedded.
@@ -125,6 +128,16 @@ Matrix findPaths(Matrix matrix, int ballRoom)
 	return paths;
 }
 
+bool validateGraph(Matrix matrix)
+{
+	for (size_t i{}; i < matrix.size(); ++i)
+	{
+		if (matrix.at(i).at(i) == 1)
+			return false;
+	}
+	return true;
+}
+
 int main()
 {
 	// Most important variables
@@ -143,17 +156,24 @@ int main()
 	readMatrix(matrix);
 	std::cout << "\nwhere ball room is in " << ballRoom << " node.\n\n";
 
-	const auto paths = findPaths(matrix, ballRoom);
-
-	// Write paths down on the console
-	if (paths.empty())
+	if (!validateGraph(matrix))
 	{
-		std::cout << "There is no proper path.\n";
+		std::cout << "Graph is incorrect.\n";
 	}
 	else
 	{
-		std::cout << "Existing paths:\n";
-		readMatrix(paths, " -> ", true);
+		const auto paths = findPaths(matrix, ballRoom);
+
+		// Write paths down on the console
+		if (paths.empty())
+		{
+			std::cout << "There is no proper path.\n";
+		}
+		else
+		{
+			std::cout << "Existing paths:\n";
+			readMatrix(paths, " -> ", true);
+		}
 	}
 
 	// Prevent from closing the console automatically
